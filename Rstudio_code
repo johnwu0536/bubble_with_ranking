@@ -1,0 +1,24 @@
+pathway = read.table("GSEA414.csv",header = T, sep=",")#包含Term Gene数目、FDR值、Group分组
+library(ggplot2)
+library(dplyr)
+library(forcats)
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(here,  
+               tidyverse, 
+               janitor, # Cleaning column names  
+               scales, # Transform axis scales   
+               ggrepel) # Optimise plot label separation 
+
+p = ggplot(pathway,aes(y=reorder(Term,Generatio,sum),x=Generatio))
+p=p + geom_point()  
+p=p + geom_point(aes(size=Gene))+geom_hline(yintercept=c(1,2,3,4,5,6,7,8,9,10),col = "grey", lty=5,lwd=0.4)
+pbubble = p+ geom_point(aes(size=Gene,color=-1*log10(FDR)))
+pr = pbubble+scale_color_gradient(low="#FAFD7CFF",high = "#642822FF")
+pr = pr+labs(color=expression(-log[10](FDR)),size="Gene Count",x="Gene Ratio",y="Term",title="Pathway enrichment")+theme(plot.title=element_text(hjust=0.5))
+pr=pr + theme_bw(base_size = 15)+
+  theme(panel.grid.major = element_line(color = NA),panel.background = element_rect(fill = "transparent",color = NA),
+        plot.background = element_rect(fill = "transparent",color = NA),panel.grid.minor = element_blank(),
+        text = element_text(size = 18,family = "sans"))+xlim(0,0.8)+geom_hline(yintercept=c(0,11),col = "black",lwd=4)
+  #(axis.line = element_line(size = 2))
+  #geom_boxplot(varwidth = TRUE,alpha = 0.2)
+pr#输出图形
